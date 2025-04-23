@@ -81,7 +81,7 @@ pipeline {
                 sh '''
                     export HOME=/var/lib/jenkins
                     export KUBECONFIG=/var/lib/jenkins/.kube/config
-                    kubectl set image deployment/devops-app devops-app=karan43124/cw2-server:1.1
+                    kubectl set image deployment/devops-app cw2-server=karan43124/cw2-server:1.1
                 '''
             }
         }
