@@ -27,15 +27,20 @@ pipeline {
         stage('Test Container') {
             steps {
                 sh '''
-                    # Stop any running container using port 8081
+                    # Stop container using port 8081, if running
                     CONTAINER_ID=$(docker ps -q --filter "publish=8081")
                     if [ ! -z "$CONTAINER_ID" ]; then
                       echo "Stopping container using port 8081..."
                       docker stop $CONTAINER_ID
                     fi
-
-                    # Start test container
+        
+                    # Remove devops-test container if it already exists
+                    docker rm -f devops-test || true
+        
+                    # Run new test container
                     docker run -d --name devops-test -p 8081:8081 cw2-server:1.1
+        
+                    # Wait and test
                     sleep 5
                     curl -f http://localhost:8081 || echo "App not responding!"
                     docker ps
