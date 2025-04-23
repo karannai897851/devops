@@ -44,6 +44,9 @@ pipeline {
         }
 
         stage('Deploy to Kubernetes') {
+            environment {
+                KUBECONFIG = '/var/lib/jenkins/.kube/config'
+            }
             steps {
                 sh 'kubectl set image deployment/devops-app devops-app=karan43124/cw2-server:1.1'
             }
