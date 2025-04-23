@@ -26,19 +26,31 @@ pipeline {
 
         stage('Test Container') {
             steps {
-                sh 'docker run -d -p 8081:8081 cw2-server:1.1'
-                sh 'sleep 5'
-                sh 'curl -f http://localhost:8081 || echo "App not responding!"'
-                sh 'docker ps'
+                sh '''
+                    # Stop any running container using port 8081
+                    CONTAINER_ID=$(docker ps -q --filter "publish=8081")
+                    if [ ! -z "$CONTAINER_ID" ]; then
+                      echo "Stopping container using port 8081..."
+                      docker stop $CONTAINER_ID
+                    fi
+
+                    # Start test container
+                    docker run -d --name devops-test -p 8081:8081 cw2-server:1.1
+                    sleep 5
+                    curl -f http://localhost:8081 || echo "App not responding!"
+                    docker ps
+                '''
             }
         }
 
         stage('Push to DockerHub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    sh 'echo $PASS | docker login -u $USER --password-stdin'
-                    sh 'docker tag cw2-server:1.1 $USER/cw2-server:1.1'
-                    sh 'docker push $USER/cw2-server:1.1'
+                    sh '''
+                        echo $PASS | docker login -u $USER --password-stdin
+                        docker tag cw2-server:1.1 $USER/cw2-server:1.1
+                        docker push $USER/cw2-server:1.1
+                    '''
                 }
             }
         }
@@ -49,6 +61,12 @@ pipeline {
             }
             steps {
                 sh 'kubectl set image deployment/devops-app devops-app=karan43124/cw2-server:1.1'
+            }
+        }
+
+        stage('Cleanup Test Container') {
+            steps {
+                sh 'docker rm -f devops-test || true'
             }
         }
     }
