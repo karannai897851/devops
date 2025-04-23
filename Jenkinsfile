@@ -63,8 +63,8 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 sh '''
-                    export HOME=/var/lib/jenkins
-                    export KUBECONFIG=/var/lib/jenkins/.kube/config
+                    export HOME=/home/ubuntu
+                    export KUBECONFIG=/home/ubuntu/.kube/config
                     kubectl set image deployment/devops-app devops-app=karan43124/cw2-server:1.1
                 '''
             }
