@@ -4,9 +4,17 @@ pipeline {
         IMAGE = 'karan43124/cw2-server:1.1'
     }
     stages {
+
         stage('Clone') {
             steps {
-                git 'https://github.com/karannai897851/devops.git'
+                git branch: 'main', url: 'https://github.com/karannai897851/devops.git'
+            }
+        }
+
+        stage('Debug Workspace') {
+            steps {
+                sh 'ls -la'
+                sh 'cat server.js || echo "server.js not found"'
             }
         }
 
