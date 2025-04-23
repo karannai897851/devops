@@ -81,6 +81,17 @@ pipeline {
                     kubectl set image deployment/devops-app ${IMAGE_NAME}=${IMAGE_TAG}
                 """
             }
+            steps {
+                sshagent(['prod-ec2-key']) {
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ubuntu@54.82.35.168'
+                            export KUBECONFIG=/home/ubuntu/.kube/config &&
+                            kubectl set image deployment/devops-app cw2-server=${IMAGE_TAG} ||
+                            kubectl set image deployment/devops-app cw2-server=${IMAGE_TAG}
+                        '
+                    """
+                }
+            }
         }
 
         stage('Cleanup Test Container') {
