@@ -60,6 +60,22 @@ pipeline {
             }
         }
 
+        stage('Ensure Kubernetes Deployment') {
+            steps {
+                sh '''
+                    export HOME=/var/lib/jenkins
+                    export KUBECONFIG=/var/lib/jenkins/.kube/config
+        
+                    # Create deployment if not exists
+                    if ! kubectl get deployment devops-app > /dev/null 2>&1; then
+                      kubectl create deployment devops-app --image=karan43124/cw2-server:1.1
+                      kubectl expose deployment devops-app --type=NodePort --port=8081
+                    fi
+                '''
+            }
+        }
+
+
         stage('Deploy to Kubernetes') {
             steps {
                 sh '''
